@@ -122,3 +122,14 @@ startStandaloneServer(server, {
 }).then(({ url }) => {
   console.log(`Server ready at ${url}`);
 });
+
+
+// COMBINED QUERY
+// query {
+//   havePhone: allPersons(phone: YES) {
+//     name
+//   }
+//   phoneLess: allPersons(phone: NO) {
+//     name
+//   }
+// }
