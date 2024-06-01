@@ -55,6 +55,10 @@ const typeDefs = `
       phone: String!
     ): Person
   }
+
+  type Subscription {
+    personAdded: Person!
+  }
 `;
 
 module.exports = typeDefs;
