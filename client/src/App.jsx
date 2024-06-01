@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useApolloClient, useQuery } from "@apollo/client";
+import { useApolloClient, useQuery, useSubscription } from "@apollo/client";
 
 import Persons from "./components/Persons";
 import PersonForm from "./components/PersonForm";
@@ -7,7 +7,8 @@ import PhoneForm from "./components/PhoneForm";
 import Notify from "./components/Notify";
 import LoginForm from "./components/LoginForm";
 
-import { ALL_PERSONS } from "./queries";
+import { ALL_PERSONS, PERSON_ADDED } from "./queries";
+import { updateCache } from "./helpers";
 
 const App = () => {
   const [token, setToken] = useState(null);
@@ -15,19 +16,27 @@ const App = () => {
   const result = useQuery(ALL_PERSONS);
   const client = useApolloClient();
 
-  useEffect(() => {
-    const storage_token = localStorage.getItem("phonenumbers-user-token");
-    if (storage_token) {
-      setToken(storage_token);
-    }
-  }, []);
-
   const notify = (message) => {
     setErrorMessage(message);
     setTimeout(() => {
       setErrorMessage(null);
     }, 10000);
   };
+
+  useSubscription(PERSON_ADDED, {
+    onData: ({ data, client }) => {
+      const addedPerson = data.data.personAdded;
+      notify(`${addedPerson.name} added`);
+      updateCache(client.cache, { query: ALL_PERSONS }, addedPerson);
+    },
+  });
+
+  useEffect(() => {
+    const storage_token = localStorage.getItem("phonenumbers-user-token");
+    if (storage_token) {
+      setToken(storage_token);
+    }
+  }, []);
 
   const logout = () => {
     setToken(null);
