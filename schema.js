@@ -23,6 +23,7 @@ const typeDefs = `
     name: String!
     phone: String
     address: Address!
+    friendOf: [User!]!
     id: ID!
   }
   
@@ -30,6 +31,7 @@ const typeDefs = `
     personCount: Int!
     allPersons(phone: YesNo): [Person!]!
     findPerson(name: String!): Person
+    friendOf: [User!]!
     me: User
   }
 

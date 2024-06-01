@@ -1,25 +1,12 @@
 const jwt = require("jsonwebtoken");
 const { GraphQLError } = require("graphql");
-const { PubSub } = require('graphql-subscriptions')
-const pubsub = new PubSub()
+const { PubSub } = require("graphql-subscriptions");
+const pubsub = new PubSub();
 
 const Person = require("./models/person.js");
 const User = require("./models/user.js");
 
 const resolvers = {
-  Query: {
-    me: (root, args, context) => {
-      return context.currentUser;
-    },
-    personCount: async () => Person.collection.countDocuments(),
-    allPersons: async (root, args) => {
-      if (!args.phone) {
-        return Person.find({});
-      }
-      return Person.find({ phone: { $exists: args.phone === "YES" } });
-    },
-    findPerson: async (root, args) => Person.findOne({ name: args.name }),
-  },
   Person: {
     address: (root) => {
       return {
@@ -27,6 +14,33 @@ const resolvers = {
         city: root.city,
       };
     },
+    friendOf: async (root) => {
+      const friends = await User.find({
+        friends: {
+          $in: [root._id],
+        },
+      });
+      return friends;
+    },
+  },
+  Query: {
+    me: (root, args, context) => {
+      return context.currentUser;
+    },
+    personCount: async () => Person.collection.countDocuments(),
+    allPersons: async (root, args) => {
+      console.log("Person.find");
+      if (!args.phone) {
+        return Person.find({});
+      }
+      return Person.find({ phone: { $exists: args.phone === "YES" } });
+    },
+    friendOf: async (root) => {
+      const friends = await User.find({ friends: { $in: [root._id] } });
+      console.log("User.find");
+      return friends;
+    },
+    findPerson: async (root, args) => Person.findOne({ name: args.name }),
   },
   Mutation: {
     createUser: async (root, args) => {
